@@ -30,6 +30,14 @@ def add_event():
     
     return render_template('add_event.html')
 
+def delete_event(event_id):
+    from app import mysql
+    cur = mysql.connection.cursor()
+    cur.execute("DELETE FROM tasks WHERE id = %s", [event_id])
+    mysql.connection.commit()
+    cur.close()
+    return redirect(url_for('events'))
+
 def privacy():
     data = {
         'children': ['Mitko', 'Ivancho', 'Gosho'],

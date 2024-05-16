@@ -11,12 +11,13 @@ app.config['MYSQL_DB'] = 'events_scheduler'
 mysql = MySQL(app)
 
 # Import routes after initializing the app and mysql
-from controllers.home_controller import home_page, privacy, events, add_event
+from controllers.home_controller import home_page, privacy, events, add_event, delete_event
 
 app.add_url_rule('/', 'home', home_page)
 app.add_url_rule('/privacy', 'privacy', privacy)
 app.add_url_rule('/events', 'events', events)
 app.add_url_rule('/events/new', 'new_event', add_event, add_event, methods=['GET', 'POST'])
+app.add_url_rule('/events/delete/<int:event_id>', 'delete_event', delete_event, methods=['POST'])
 
 if __name__ == "__main__":
     app.run(debug=True)
