@@ -1,15 +1,34 @@
-from flask import render_template
+from flask import render_template, request, redirect, url_for
+from flask import current_app as app
 
 def home_page():
     return render_template('home.html')
 
 def events():
-    events = [
-        {'id': 1, 'text': "Doctor's appointment", 'date': '2024-04-30'},
-        {'id': 2, 'text': "Team meeting at work", 'date': '2024-05-01'},
-        {'id': 3, 'text': "Friend's wedding", 'date': '2024-05-15'}
-    ]
-    return render_template('events.html', events=events)
+    # Importing mysql here to avoid circular import
+    from app import mysql
+    cur = mysql.connection.cursor()
+    cur.execute("SELECT id, text, date FROM tasks ORDER BY date")
+    events = cur.fetchall()
+    cur.close()
+    event_list = [{'id': event[0], 'text': event[1], 'date': event[2].isoformat()} for event in events]
+
+    return render_template('events.html', events=event_list)
+
+def add_event():
+    from app import mysql
+    if request.method == 'POST':
+        event_text = request.form['text']
+        event_date = request.form['date']
+        
+        cur = mysql.connection.cursor()
+        cur.execute("INSERT INTO tasks (text, date) VALUES (%s, %s)", (event_text, event_date))
+        mysql.connection.commit()
+        cur.close()
+        
+        return redirect(url_for('events'))
+    
+    return render_template('add_event.html')
 
 def privacy():
     data = {
